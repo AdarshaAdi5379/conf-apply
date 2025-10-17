@@ -11,6 +11,7 @@ backend/node_modules/
 .env.production.local
 .env.test.local
 .env.example
+*.env
 
 # Logs
 logs
@@ -25,9 +26,11 @@ Thumbs.db
 
 # Build outputs
 dist/
+dist-ssr/
 build/
 frontend/build/
 backend/dist/
+*.local
 
 # Coverage
 coverage/
@@ -36,8 +39,9 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
-*.swp
-*.swo
+.cache/
+tmp/
+temp/
 
 # IDE settings
 .vscode/
@@ -55,7 +59,7 @@ public/uploads/
 # Database dumps
 *.sql
 *.sqlite
-
+*.db
 
 # Dependencies
 node_modules/
@@ -65,20 +69,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env
-
-# Build outputs
-dist/
-dist-ssr/
-build/
-*.local
-
 # Editor directories and files
 .vscode/
 .idea/
@@ -87,29 +77,18 @@ build/
 *.njsproj
 *.sln
 *.sw?
-.DS_Store
+*.swp
+*.swo
 
 # Testing
 coverage/
 *.lcov
 .nyc_output
 
-# Logs
-logs/
-*.log
-
-# OS files
-Thumbs.db
-.DS_Store
-
-# Temporary files
-*.tmp
-*.temp
-.cache/
-
 # Database
 *.sqlite
 *.db
+*.sql
 
 # Production
 /backend/dist
@@ -146,7 +125,6 @@ out
 .nuxt
 
 # Gatsby files
-.cache/
 public
 
 # Serverless directories
@@ -163,10 +141,6 @@ public
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
-
-# Temporary folders
-tmp/
-temp/
 
 # Test connection file
 test-connection.js
