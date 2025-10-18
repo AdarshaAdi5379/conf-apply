@@ -26,36 +26,58 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async () => {
     try {
-      const response = await authAPI.getMe();
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
+      const response = await authAPI.getCurrentUser();
       setUser(response.data.data);
     } catch (error) {
       console.error('Load user error:', error);
-      logout();
+      
+      // Clear invalid token and reset state
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const login = async (email, password) => {
-    const response = await authAPI.login({ email, password });
-    const { token: newToken, user: userData } = response.data.data;
-    
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(userData);
-    
-    return userData;
+    try {
+      const response = await authAPI.login({ email, password });
+      const { token: newToken, user: userData } = response.data.data;
+      
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(userData);
+      
+      return userData;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const register = async (name, email, password, role) => {
-    const response = await authAPI.register({ name, email, password, role });
-    const { token: newToken, user: userData } = response.data.data;
-    
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
-    setUser(userData);
-    
-    return userData;
+    try {
+      const response = await authAPI.register({ name, email, password, role });
+      const { token: newToken, user: userData } = response.data.data;
+      
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(userData);
+      
+      return userData;
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
