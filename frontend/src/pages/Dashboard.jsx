@@ -2,9 +2,11 @@ import { useAuth } from '../context/AuthContext';
 import RecruiterVerificationForm from '../components/RecruiterVerificationForm';
 import Leaderboard from '../components/Leaderboard';
 import { Search, TrendingUp, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -54,6 +56,23 @@ const Dashboard = () => {
       <div className="grid lg:grid-cols-2 gap-8">
         {user?.role === 'candidate' && (
           <>
+            <div className="card mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Job Management</h2>
+              <div className="flex gap-3 flex-wrap">
+                <button
+                  onClick={() => navigate('/jobs')}
+                  className="btn-primary"
+                >
+                  Browse Jobs
+                </button>
+                <button
+                  onClick={() => navigate('/my-applications')}
+                  className="btn-secondary"
+                >
+                  My Applications
+                </button>
+              </div>
+            </div>
             <RecruiterVerificationForm />
             <Leaderboard />
           </>
@@ -66,10 +85,18 @@ const Dashboard = () => {
               <p className="text-gray-600 mb-6">
                 Build trust with candidates by maintaining a verified profile and responding to feedback.
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-blue-800">
                   💡 Tip: Respond to candidate feedback promptly to improve your trust score!
                 </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => navigate('/recruiter/jobs')}
+                  className="btn-primary"
+                >
+                  Manage Jobs
+                </button>
               </div>
             </div>
             <div className="mt-8">

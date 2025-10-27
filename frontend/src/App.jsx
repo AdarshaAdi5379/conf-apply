@@ -9,6 +9,11 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import RecruiterProfile from './pages/RecruiterProfile';
 import Admin from './pages/Admin';
+import RecruiterJobs from './pages/RecruiterJobs';
+import BrowseJobs from './pages/BrowseJobs';
+import JobDetails from './pages/JobDetails';
+import ApplicationManager from './pages/ApplicationManager';
+import MyApplications from './pages/MyApplications';
 
 function App() {
   return (
@@ -38,6 +43,37 @@ function App() {
                   <Admin />
                 </ProtectedRoute>
               }
+            />
+
+            {/* Job Routes */}
+            <Route path="/jobs" element={<BrowseJobs />} />
+            <Route path="/jobs/:id" element={<JobDetails />} />
+
+            <Route 
+              path="/recruiter/jobs" 
+              element={
+                <ProtectedRoute roles={['recruiter']}>
+                  <RecruiterJobs />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/jobs/:id/applications" 
+              element={
+                <ProtectedRoute roles={['recruiter']}>
+                  <ApplicationManager />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/my-applications" 
+              element={
+                <ProtectedRoute roles={['candidate']}>
+                  <MyApplications />
+                </ProtectedRoute>
+              } 
             />
           </Routes>
           
