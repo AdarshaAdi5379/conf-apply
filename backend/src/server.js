@@ -7,6 +7,32 @@ const path = require('path');
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
 
+import cors from "cors";
+
+const allowedOrigins = [
+  "https://recruiter-risk.vercel.app",
+  "http://localhost:5173",
+  process.env.FRONTEND_ORIGIN // optional: set in Render if you move domains
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow server-to-server / curl (no origin) and your allowed list
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// Make sure preflight is handled
+app.options("*", cors({
+  origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)),
+  credentials: true
+}));
+
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const recruiterRoutes = require('./routes/recruiter');

@@ -88,12 +88,12 @@ const Login = () => {
             </p>
           </div>
 
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+          {/* <div className="mt-4 p-4 bg-blue-50 rounded-lg">
             <p className="text-xs text-gray-600 mb-2 font-medium">Demo Accounts:</p>
             <p className="text-xs text-gray-600">Admin: admin@recruiterrisk.com / admin123</p>
             <p className="text-xs text-gray-600">Candidate: john@example.com / password123</p>
             <p className="text-xs text-gray-600">Recruiter: sarah@techcorp.com / password123</p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
