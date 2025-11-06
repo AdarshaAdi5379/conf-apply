@@ -226,3 +226,4 @@ applicationSchema.statics.getByStatus = function(status, jobId) {
 
 module.exports = mongoose.model('Application', applicationSchema);
 
+
