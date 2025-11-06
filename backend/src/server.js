@@ -1,98 +1,69 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
-const connectDB = require('./config/database');
-const errorHandler = require('./middleware/errorHandler');
+// -------------------- IMPORTS --------------------
+const express = require("express");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const cors = require("cors");
 
-import cors from "cors";
+const authRoutes = require("./routes/auth.js");
+const recruiterRoutes = require("./routes/recruiter.js");
+const feedbackRoutes = require("./routes/feedback.js");
+const adminRoutes = require("./routes/admin.js");
+// const jobRoutes = require("./routes/job.js");  // if added
 
+// -------------------- CONFIG --------------------
+dotenv.config();
+const app = express();
+
+// -------------------- CORS SETUP --------------------
 const allowedOrigins = [
   "https://recruiter-risk.vercel.app",
   "http://localhost:5173",
-  process.env.FRONTEND_ORIGIN // optional: set in Render if you move domains
-];
+  process.env.FRONTEND_ORIGIN
+].filter(Boolean); // Filter out undefined values
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // allow server-to-server / curl (no origin) and your allowed list
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
-
-// Make sure preflight is handled
-app.options("*", cors({
-  origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)),
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const recruiterRoutes = require('./routes/recruiter');
-const feedbackRoutes = require('./routes/feedback');
-const adminRoutes = require('./routes/admin');
-const jobRoutes = require('./routes/job');              // NEW
-const applicationRoutes = require('./routes/application'); // NEW
-
-const app = express();
-
-// Connect to MongoDB
-connectDB();
-
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use('/api/', limiter);
-
-// Body parser middleware
+// -------------------- MIDDLEWARE --------------------
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Static files for uploads
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// -------------------- ROUTES --------------------
+app.get("/health", (req, res) => res.json({ ok: true }));
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.use("/api/auth", authRoutes);
+app.use("/api/recruiter", recruiterRoutes);
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/admin", adminRoutes);
+// app.use("/jobs", jobRoutes);  // optional
+
+// -------------------- 404 HANDLER --------------------
+app.use((req, res, next) => {
+  console.log(`404 -> ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ error: "Not found" });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/recruiter', recruiterRoutes);
-app.use('/api/feedback', feedbackRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/jobs', jobRoutes);              // NEW
-app.use('/api/applications', applicationRoutes); // NEW
+// -------------------- DATABASE CONNECTION --------------------
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected Successfully"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// Error handling middleware
-app.use(errorHandler);
-
+// -------------------- SERVER --------------------
 const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`🚀 RecruiterRisk API running on port ${PORT}`)
+);
 
-app.listen(PORT, () => {
-  console.log(`🚀 RecruiterRisk API running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-  console.log(`💼 Job Posting System: ENABLED`);
-});

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://recruiter-risk-backend.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -39,30 +39,30 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (userData) => api.post('/auth/register', userData),
-  getCurrentUser: () => api.get('/auth/me'),
-  logout: () => api.post('/auth/logout'),
+  login: (credentials) => api.post('auth/login', credentials),
+  register: (userData) => api.post('auth/register', userData),
+  getCurrentUser: () => api.get('auth/me'),
+  logout: () => api.post('auth/logout'),
 };
 
 export const recruiterAPI = {
-  search: (params) => api.get('/recruiters/search', { params }),
-  getById: (id) => api.get(`/recruiters/${id}`),
-  verify: (data) => api.post('/recruiters/verify', data),
+  search: (params) => api.get('recruiters/search', { params }),
+  getById: (id) => api.get(`recruiters/${id}`),
+  verify: (data) => api.post('recruiters/verify', data),
 };
 
 export const feedbackAPI = {
-  create: (data) => api.post('/feedback', data),
-  getByRecruiter: (recruiterId) => api.get(`/feedback/recruiter/${recruiterId}`),
-  report: (feedbackId, data) => api.post(`/feedback/${feedbackId}/report`, data),
+  create: (data) => api.post('feedback', data),
+  getByRecruiter: (recruiterId) => api.get(`feedback/recruiter/${recruiterId}`),
+  report: (feedbackId, data) => api.post(`feedback/${feedbackId}/report`, data),
 };
 
 export const adminAPI = {
-  getDashboard: () => api.get('/admin/dashboard'),
-  getFlaggedRecruiters: () => api.get('/admin/flagged-recruiters'),
-  getReportedFeedback: () => api.get('/admin/reported-feedback'),
-  flagRecruiter: (id, data) => api.put(`/admin/recruiters/${id}/flag`, data),
-  deleteFeedback: (id) => api.delete(`/admin/feedback/${id}`),
+  getDashboard: () => api.get('admin/dashboard'),
+  getFlaggedRecruiters: () => api.get('admin/flagged-recruiters'),
+  getReportedFeedback: () => api.get('admin/reported-feedback'),
+  flagRecruiter: (id, data) => api.put(`admin/recruiters/${id}/flag`, data),
+  deleteFeedback: (id) => api.delete(`admin/feedback/${id}`),
 };
 
 export default api;

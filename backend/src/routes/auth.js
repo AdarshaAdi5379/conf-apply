@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
-const { auth } = require('../middleware/auth'); // Make sure this import is correct
+const { auth } = require('../middleware/auth');
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
