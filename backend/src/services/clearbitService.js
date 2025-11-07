@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 class ClearbitService {
   constructor() {
@@ -93,4 +93,4 @@ class ClearbitService {
   }
 }
 
-module.exports = new ClearbitService();
+export default new ClearbitService();

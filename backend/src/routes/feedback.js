@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const Feedback = require('../models/Feedback');
-const Recruiter = require('../models/Recruiter');
-const { protect } = require('../middleware/auth');
-const trustScoreService = require('../services/trustScoreService');
+import { body, validationResult } from 'express-validator';
+import Feedback from '../models/Feedback.js';
+import Recruiter from '../models/Recruiter.js';
+import { protect } from '../middleware/auth.js';
+import trustScoreService from '../services/trustScoreService.js';
 
 // @route   POST /api/feedback
 router.post('/', protect, [
@@ -179,4 +179,4 @@ router.get('/my-feedback', protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

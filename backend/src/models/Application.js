@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const applicationSchema = new mongoose.Schema({
   jobId: {
@@ -224,6 +224,6 @@ applicationSchema.statics.getByStatus = function(status, jobId) {
   return this.find(query).sort({ createdAt: -1 });
 };
 
-module.exports = mongoose.model('Application', applicationSchema);
+export default mongoose.model('Application', applicationSchema);
 
 

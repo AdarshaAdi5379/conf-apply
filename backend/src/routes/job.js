@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const Job = require('../models/Job');
-const Application = require('../models/Application');
-const Recruiter = require('../models/Recruiter');
-const { protect, authorize } = require('../middleware/auth');
+import { body, validationResult } from 'express-validator';
+import Job from '../models/Job.js';
+import Application from '../models/Application.js';
+import Recruiter from '../models/Recruiter.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 // @route   POST /api/jobs
 // @desc    Create a new job posting
@@ -353,4 +353,4 @@ router.get('/stats/dashboard', protect, authorize('recruiter'), async (req, res)
   }
 });
 
-module.exports = router;
+export default router;

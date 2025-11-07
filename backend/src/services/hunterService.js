@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 class HunterService {
   constructor() {
@@ -103,4 +103,4 @@ class HunterService {
   }
 }
 
-module.exports = new HunterService();
+export default new HunterService();

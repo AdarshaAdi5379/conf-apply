@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-const auth = async (req, res, next) => {
+export const auth = async (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.header('Authorization');
@@ -56,7 +56,7 @@ const auth = async (req, res, next) => {
 };
 
 // Optional: Role-based authorization middleware
-const authorize = (...roles) => {
+export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
@@ -76,4 +76,4 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { auth, authorize, protect: auth };
+export const protect = auth;

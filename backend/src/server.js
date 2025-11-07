@@ -1,14 +1,14 @@
 // -------------------- IMPORTS --------------------
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const cors = require("cors");
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
 
-const authRoutes = require("./routes/auth.js");
-const recruiterRoutes = require("./routes/recruiter.js");
-const feedbackRoutes = require("./routes/feedback.js");
-const adminRoutes = require("./routes/admin.js");
-// const jobRoutes = require("./routes/job.js");  // if added
+import authRoutes from './routes/auth.js';
+import recruiterRoutes from './routes/recruiter.js';
+import feedbackRoutes from './routes/feedback.js';
+import adminRoutes from './routes/admin.js';
+// import jobRoutes from './routes/job.js';  // if added
 
 // -------------------- CONFIG --------------------
 dotenv.config();
@@ -16,8 +16,8 @@ const app = express();
 
 // -------------------- CORS SETUP --------------------
 const allowedOrigins = [
-  "https://recruiter-risk.vercel.app",
   "http://localhost:5173",
+  /^https:\/\/recruiter-risk.*\.vercel\.app$/,
   process.env.FRONTEND_ORIGIN
 ].filter(Boolean); // Filter out undefined values
 
@@ -43,6 +43,22 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 // app.use("/jobs", jobRoutes);  // optional
 
+// -------------------- ERROR HANDLER --------------------
+app.use((err, req, res, next) => {
+  console.error('Server Error:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body
+  });
+  res.status(500).json({ 
+    success: false, 
+    error: 'Server error',
+    details: err.message 
+  });
+});
+
 // -------------------- 404 HANDLER --------------------
 app.use((req, res, next) => {
   console.log(`404 -> ${req.method} ${req.originalUrl}`);
@@ -51,7 +67,7 @@ app.use((req, res, next) => {
 
 // -------------------- DATABASE CONNECTION --------------------
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected Successfully"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
 

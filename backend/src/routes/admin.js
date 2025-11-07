@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const Recruiter = require('../models/Recruiter');
-const Feedback = require('../models/Feedback');
-const User = require('../models/User');
-const { protect, authorize } = require('../middleware/auth');
+import Recruiter from '../models/Recruiter.js';
+import Feedback from '../models/Feedback.js';
+import User from '../models/User.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 // @route   GET /api/admin/dashboard
 router.get('/dashboard', protect, authorize('admin'), async (req, res) => {
@@ -126,4 +126,4 @@ router.delete('/feedback/:id', protect, authorize('admin'), async (req, res) => 
   }
 });
 
-module.exports = router;
+export default router;

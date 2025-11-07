@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const Recruiter = require('../models/Recruiter');
-const Feedback = require('../models/Feedback');
-const { protect, authorize } = require('../middleware/auth');
-const clearbitService = require('../services/clearbitService');
-const hunterService = require('../services/hunterService');
-const safeBrowsingService = require('../services/safeBrowsingService');
-const trustScoreService = require('../services/trustScoreService');
+import { body, validationResult } from 'express-validator';
+import Recruiter from '../models/Recruiter.js';
+import Feedback from '../models/Feedback.js';
+import { protect, authorize } from '../middleware/auth.js';
+import clearbitService from '../services/clearbitService.js';
+import hunterService from '../services/hunterService.js';
+import safeBrowsingService from '../services/safeBrowsingService.js';
+import trustScoreService from '../services/trustScoreService.js';
 
 // @route   POST /api/recruiter/verify
 router.post('/verify', [
@@ -209,4 +209,4 @@ router.get('/search/query', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

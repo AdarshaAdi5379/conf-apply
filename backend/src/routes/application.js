@@ -1,11 +1,11 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const multer = require('multer');
-const path = require('path');
-const Application = require('../models/Application');
-const Job = require('../models/Job');
-const { protect, authorize } = require('../middleware/auth');
+import { body, validationResult } from 'express-validator';
+import multer from 'multer';
+import path from 'path';
+import Application from '../models/Application.js';
+import Job from '../models/Job.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 // Configure multer for resume uploads
 const storage = multer.diskStorage({
@@ -452,4 +452,4 @@ router.get('/recruiter/dashboard', protect, authorize('recruiter'), async (req, 
   }
 });
 
-module.exports = router;
+export default router;

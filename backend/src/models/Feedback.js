@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const feedbackSchema = new mongoose.Schema({
   candidateId: {
@@ -67,4 +67,4 @@ const feedbackSchema = new mongoose.Schema({
 feedbackSchema.index({ recruiterId: 1, createdAt: -1 });
 feedbackSchema.index({ candidateId: 1 });
 
-module.exports = mongoose.model('Feedback', feedbackSchema);
+export default mongoose.model('Feedback', feedbackSchema);

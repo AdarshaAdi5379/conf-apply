@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const recruiterSchema = new mongoose.Schema({
   userId: {
@@ -113,4 +113,4 @@ recruiterSchema.pre('save', function(next) {
   next();
 });
 
-module.exports = mongoose.model('Recruiter', recruiterSchema);
+export default mongoose.model('Recruiter', recruiterSchema);

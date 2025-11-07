@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const jobSchema = new mongoose.Schema({
   recruiterId: {
@@ -239,4 +239,4 @@ jobSchema.statics.getActiveJobs = function(filters = {}) {
   }).sort({ createdAt: -1 });
 };
 
-module.exports = mongoose.model('Job', jobSchema);
+export default mongoose.model('Job', jobSchema);

@@ -1,4 +1,4 @@
-const errorHandler = (err, req, res, next) => {
+export default (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
@@ -28,5 +28,3 @@ const errorHandler = (err, req, res, next) => {
     error: error.message || 'Server Error'
   });
 };
-
-module.exports = errorHandler;

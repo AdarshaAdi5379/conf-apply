@@ -1,5 +1,5 @@
-const natural = require('natural');
-const Feedback = require('../models/Feedback');
+import natural from 'natural';
+import Feedback from '../models/Feedback.js';
 
 class TrustScoreService {
   constructor() {
@@ -108,4 +108,4 @@ class TrustScoreService {
   }
 }
 
-module.exports = new TrustScoreService();
+export default new TrustScoreService();

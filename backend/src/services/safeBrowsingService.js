@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 class SafeBrowsingService {
   constructor() {
@@ -54,4 +54,4 @@ class SafeBrowsingService {
   }
 }
 
-module.exports = new SafeBrowsingService();
+export default new SafeBrowsingService();
