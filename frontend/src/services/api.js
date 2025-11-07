@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://recruiter-risk-backend.onrender.com/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://recruiter-risk-backend.onrender.com';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,6 +27,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Log full error details
+    console.error('API Error:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      url: error.config?.url,
+      method: error.config?.method,
+      baseURL: error.config?.baseURL,
+      headers: error.config?.headers,
+      data: error.response?.data || error.response || 'No response'
+    });
+
     // Don't redirect on 401 during initial load
     if (error.response?.status === 401 && !error.config.url.includes('/auth/me')) {
       localStorage.removeItem('token');
@@ -39,10 +51,10 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (credentials) => api.post('auth/login', credentials),
-  register: (userData) => api.post('auth/register', userData),
-  getCurrentUser: () => api.get('auth/me'),
-  logout: () => api.post('auth/logout'),
+  login: (credentials) => api.post('/api/auth/login', credentials),
+  register: (userData) => api.post('/api/auth/register', userData),
+  getCurrentUser: () => api.get('/api/auth/me'),
+  logout: () => api.post('/api/auth/logout'),
 };
 
 export const recruiterAPI = {

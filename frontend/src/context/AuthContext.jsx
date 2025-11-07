@@ -35,7 +35,16 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.getCurrentUser();
       setUser(response.data.data);
     } catch (error) {
-      console.error('Load user error:', error);
+      console.error('Load user error:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: error.config?.baseURL,
+        headers: error.config?.headers,
+        data: error.response?.data || error.response || 'No response'
+      });
       
       // Clear invalid token and reset state
       if (error.response?.status === 401) {
@@ -59,7 +68,16 @@ export const AuthProvider = ({ children }) => {
       
       return userData;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: error.config?.baseURL,
+        headers: error.config?.headers,
+        data: error.response?.data || error.response || 'No response'
+      });
       throw error;
     }
   };
@@ -75,7 +93,16 @@ export const AuthProvider = ({ children }) => {
       
       return userData;
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Register error:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: error.config?.baseURL,
+        headers: error.config?.headers,
+        data: error.response?.data || error.response || 'No response'
+      });
       throw error;
     }
   };
