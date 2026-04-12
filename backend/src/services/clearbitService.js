@@ -1,16 +1,20 @@
 import axios from 'axios';
+import CircuitBreaker from '../utils/circuitBreaker.js';
 
 class ClearbitService {
   constructor() {
     this.apiKey = process.env.CLEARBIT_API_KEY;
     this.baseUrl = 'https://company.clearbit.com/v2/companies';
+    this.circuitBreaker = new CircuitBreaker({ name: 'clearbit', failureThreshold: 3, resetTimeout: 60000 });
   }
 
   async verifyCompanyDomain(domain) {
-    try {
+    const fallback = () => this.getMockDomainScore(domain);
+    
+    const action = async () => {
       if (!this.apiKey || this.apiKey === 'your_clearbit_api_key_here') {
         console.warn('⚠️  Clearbit API key not configured, using mock data');
-        return this.getMockDomainScore(domain);
+        return fallback();
       }
 
       const response = await axios.get(`${this.baseUrl}/find`, {
@@ -48,12 +52,13 @@ class ClearbitService {
       }
 
       return { verified: false, score: 0, data: null };
+    };
+
+    try {
+      return await this.circuitBreaker.execute(action, fallback);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        return { verified: false, score: 0, data: null };
-      }
       console.error('Clearbit API Error:', error.message);
-      return this.getMockDomainScore(domain);
+      return fallback();
     }
   }
 

@@ -1,16 +1,20 @@
 import axios from 'axios';
+import CircuitBreaker from '../utils/circuitBreaker.js';
 
 class SafeBrowsingService {
   constructor() {
     this.apiKey = process.env.GOOGLE_SAFE_BROWSING_API_KEY;
     this.baseUrl = 'https://safebrowsing.googleapis.com/v4/threatMatches:find';
+    this.circuitBreaker = new CircuitBreaker({ name: 'safebrowsing', failureThreshold: 3, resetTimeout: 60000 });
   }
 
   async checkUrl(url) {
-    try {
+    const fallback = () => this.getMockSafeBrowsingCheck(url);
+    
+    const action = async () => {
       if (!this.apiKey || this.apiKey === 'your_google_safe_browsing_api_key_here') {
         console.warn('⚠️  Google Safe Browsing API key not configured, using mock data');
-        return this.getMockSafeBrowsingCheck(url);
+        return fallback();
       }
 
       const response = await axios.post(`${this.baseUrl}?key=${this.apiKey}`, {
@@ -33,9 +37,13 @@ class SafeBrowsingService {
         score: isSafe ? 100 : 0,
         threats: response.data.matches || []
       };
+    };
+
+    try {
+      return await this.circuitBreaker.execute(action, fallback);
     } catch (error) {
       console.error('Safe Browsing API Error:', error.message);
-      return this.getMockSafeBrowsingCheck(url);
+      return fallback();
     }
   }
 

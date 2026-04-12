@@ -1,16 +1,20 @@
 import axios from 'axios';
+import CircuitBreaker from '../utils/circuitBreaker.js';
 
 class HunterService {
   constructor() {
     this.apiKey = process.env.HUNTER_API_KEY;
     this.baseUrl = 'https://api.hunter.io/v2';
+    this.circuitBreaker = new CircuitBreaker({ name: 'hunter', failureThreshold: 3, resetTimeout: 60000 });
   }
 
   async verifyEmail(email) {
-    try {
+    const fallback = () => this.getMockEmailVerification(email);
+    
+    const action = async () => {
       if (!this.apiKey || this.apiKey === 'your_hunter_api_key_here') {
         console.warn('⚠️  Hunter API key not configured, using mock data');
-        return this.getMockEmailVerification(email);
+        return fallback();
       }
 
       const response = await axios.get(`${this.baseUrl}/email-verifier`, {
@@ -59,9 +63,13 @@ class HunterService {
           smtp_check: data.smtp_check
         }
       };
+    };
+
+    try {
+      return await this.circuitBreaker.execute(action, fallback);
     } catch (error) {
       console.error('Hunter API Error:', error.message);
-      return this.getMockEmailVerification(email);
+      return fallback();
     }
   }
 
