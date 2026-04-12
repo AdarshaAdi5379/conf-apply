@@ -168,17 +168,20 @@ router.get('/my-jobs', protect, authorize('recruiter', 'admin'), async (req, res
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const jobs = await sql`
-      select * from jobs where ${where}
+      select j.*, 
+        (select count(*)::int from applications where job_id = j.id) as application_count
+      from jobs j
+      where ${where}
       order by created_at desc
       limit ${parseInt(limit)} offset ${skip}
     `;
 
-    const totalResult = await sql`select count(*) from jobs where ${where}`;
+    const totalResult = await sql`select count(*) from jobs j where ${where}`;
     const total = parseInt(totalResult[0].count);
 
-    const jobsWithStats = await Promise.all(jobs.map(async (job) => {
-      const appCount = await sql`select count(*) from applications where job_id = ${job.id}`;
-      return { ...toCamel(job), applicationCount: parseInt(appCount[0].count) };
+    const jobsWithStats = jobs.map(job => ({
+      ...toCamel(job),
+      applicationCount: job.application_count
     }));
 
     res.json({
