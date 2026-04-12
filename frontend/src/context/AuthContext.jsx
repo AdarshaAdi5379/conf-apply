@@ -14,19 +14,19 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
 
   useEffect(() => {
-    if (token) {
+    if (accessToken) {
       loadUser();
     } else {
       setLoading(false);
     }
-  }, [token]);
+  }, [accessToken]);
 
   const loadUser = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       if (!token) {
         setLoading(false);
         return;
@@ -46,10 +46,10 @@ export const AuthProvider = ({ children }) => {
         data: error.response?.data || error.response || 'No response'
       });
       
-      // Clear invalid token and reset state
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        setToken(null);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setAccessToken(null);
         setUser(null);
       }
     } finally {
@@ -60,10 +60,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password });
-      const { token: newToken, user: userData } = response.data.data;
+      const { accessToken: newAccessToken, refreshToken, user: userData } = response.data.data;
       
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
+      localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      setAccessToken(newAccessToken);
       setUser(userData);
       
       return userData;
@@ -85,10 +86,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, role) => {
     try {
       const response = await authAPI.register({ name, email, password, role });
-      const { token: newToken, user: userData } = response.data.data;
+      const { accessToken: newAccessToken, refreshToken, user: userData } = response.data.data;
       
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
+      localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      setAccessToken(newAccessToken);
       setUser(userData);
       
       return userData;
@@ -108,14 +110,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setAccessToken(null);
     setUser(null);
   };
 
   const value = {
     user,
-    token,
+    token: accessToken,
     loading,
     login,
     register,

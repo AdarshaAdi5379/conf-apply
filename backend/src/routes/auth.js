@@ -6,6 +6,22 @@ import bcrypt from 'bcryptjs';
 import sql from '../db.js';
 import { auth } from '../middleware/auth.js';
 
+const ACCESS_TOKEN_EXPIRY = '15m';
+const REFRESH_TOKEN_EXPIRY = '7d';
+
+function generateTokens(user) {
+  const payload = {
+    userId: user.id,
+    role: user.role,
+    recruiterId: user.recruiterId
+  };
+  
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  
+  return { accessToken, refreshToken };
+}
+
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
@@ -44,17 +60,13 @@ router.post('/register', [
     `;
     const user = createdUsers[0];
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const { accessToken, refreshToken } = generateTokens(user);
 
     res.status(201).json({
       success: true,
       data: {
-        token,
+        accessToken,
+        refreshToken,
         user: {
           _id: user.id,
           name: user.name,
@@ -115,17 +127,13 @@ router.post('/login', [
       });
     }
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const { accessToken, refreshToken } = generateTokens(user);
 
     res.json({
       success: true,
       data: {
-        token,
+        accessToken,
+        refreshToken,
         user: {
           _id: user.id,
           name: user.name,
@@ -174,6 +182,82 @@ router.get('/me', auth, async (req, res) => {
       error: 'Server error'
     });
   }
+});
+
+// @route   POST /api/auth/refresh
+// @desc    Refresh access token
+// @access  Public
+router.post('/refresh', [
+  body('refreshToken').notEmpty().withMessage('Refresh token is required')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const { refreshToken } = req.body;
+
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      
+      if (decoded.type !== 'refresh') {
+        return res.status(401).json({
+          success: false,
+          error: 'Invalid refresh token'
+        });
+      }
+
+      const users = await sql`
+        select id, name, email, role, recruiter_id as "recruiterId"
+        from users
+        where id = ${decoded.userId}
+        limit 1
+      `;
+      
+      const user = users[0];
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not found'
+        });
+      }
+
+      const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+
+      res.json({
+        success: true,
+        data: {
+          accessToken,
+          refreshToken: newRefreshToken
+        }
+      });
+    } catch (jwtError) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired refresh token'
+      });
+    }
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error during token refresh'
+    });
+  }
+});
+
+// @route   POST /api/auth/logout
+// @desc    Logout user
+// @access  Public
+router.post('/logout', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
 });
 
 export default router;

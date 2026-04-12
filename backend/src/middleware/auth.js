@@ -1,9 +1,7 @@
 import jwt from 'jsonwebtoken';
-import sql from '../db.js';
 
 export const auth = async (req, res, next) => {
   try {
-    // Get token from header
     const authHeader = req.header('Authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,34 +12,24 @@ export const auth = async (req, res, next) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const users = await sql`
-      select
-        id,
-        name,
-        email,
-        role,
-        recruiter_id as "recruiterId",
-        created_at as "createdAt"
-      from users
-      where id = ${decoded.userId}
-      limit 1
-    `;
-
-    const userRow = users[0];
-
-    if (!userRow) {
+    if (decoded.type === 'refresh') {
       return res.status(401).json({
         success: false,
-        error: 'User not found'
+        error: 'Cannot use refresh token for authentication'
       });
     }
 
-    // Attach user to request
-    req.user = { _id: userRow.id, ...userRow };
+    const user = {
+      _id: decoded.userId,
+      id: decoded.userId,
+      role: decoded.role,
+      recruiterId: decoded.recruiterId,
+      fromToken: true
+    };
+
+    req.user = user;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
