@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, MapPin, Briefcase, DollarSign, Clock, Filter } from 'lucide-react';
 import { getTrustLevel } from '../utils/helpers';
+import { jobAPI } from '../services/api';
 
 const BrowseJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -28,15 +29,11 @@ const BrowseJobs = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      
+      const params = {};
       Object.keys(filters).forEach(key => {
-        if (filters[key]) params.append(key, filters[key]);
+        if (filters[key]) params[key] = filters[key];
       });
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/jobs?${params}`);
-      const data = await response.json();
-      
+      const { data } = await jobAPI.getAll(params);
       if (data.success) {
         setJobs(data.data);
       }

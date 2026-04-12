@@ -2,11 +2,14 @@
   "name": "recruiter-risk-backend",
   "version": "1.0.0",
   "description": "RecruiterRisk Backend API - Trust layer for recruiter verification",
+  "type": "module",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node seed.js"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [
     "recruiter",
@@ -26,12 +29,14 @@
     "express-validator": "^7.2.1",
     "helmet": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.19.1",
     "multer": "^2.0.2",
-    "natural": "^6.10.4"
+    "natural": "^6.10.4",
+    "postgres": "^3.4.8"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "20.x"

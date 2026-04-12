@@ -5,6 +5,7 @@ import {
   UserCheck, Star, MessageSquare, Calendar 
 } from 'lucide-react';
 import { formatDate, formatRelativeTime } from '../utils/helpers';
+import { jobAPI, applicationAPI } from '../services/api';
 
 const ApplicationManager = () => {
   const { id: jobId } = useParams();
@@ -23,12 +24,7 @@ const ApplicationManager = () => {
 
   const fetchJobDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/jobs/${jobId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
+      const { data } = await jobAPI.getById(jobId);
       if (data.success) {
         setJob(data.data);
       }
@@ -39,16 +35,8 @@ const ApplicationManager = () => {
 
   const fetchApplications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const url = statusFilter === 'all'
-        ? `${import.meta.env.VITE_API_URL}/applications/job/${jobId}`
-        : `${import.meta.env.VITE_API_URL}/applications/job/${jobId}?status=${statusFilter}`;
-
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
+      const params = statusFilter !== 'all' ? { status: statusFilter } : {};
+      const { data } = await applicationAPI.getJobApplications(jobId, params);
       if (data.success) {
         setApplications(data.data);
         setStatusBreakdown(data.statusBreakdown || []);
@@ -62,21 +50,7 @@ const ApplicationManager = () => {
 
   const updateApplicationStatus = async (applicationId, newStatus) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/applications/${applicationId}/status`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ status: newStatus })
-        }
-      );
-
-      const data = await response.json();
-      
+      const { data } = await applicationAPI.updateStatus(applicationId, { status: newStatus });
       if (data.success) {
         fetchApplications();
         setSelectedApplication(null);

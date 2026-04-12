@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Plus, Minus } from 'lucide-react';
+import { jobAPI } from '../services/api';
 
 const CreateJobForm = ({ onClose, onSuccess, editJob = null }) => {
   const [loading, setLoading] = useState(false);
@@ -70,22 +71,9 @@ const CreateJobForm = ({ onClose, onSuccess, editJob = null }) => {
         benefits: formData.benefits.filter(b => b.trim())
       };
 
-      const url = editJob 
-        ? `${import.meta.env.VITE_API_URL}/jobs/${editJob._id}`
-        : `${import.meta.env.VITE_API_URL}/jobs`;
-      
-      const method = editJob ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(cleanedData)
-      });
-
-      const data = await response.json();
+      const { data } = editJob
+        ? await jobAPI.update(editJob._id, cleanedData)
+        : await jobAPI.create(cleanedData);
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to save job');

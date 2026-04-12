@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import sql from '../db.js';
 
 export const auth = async (req, res, next) => {
   try {
@@ -18,10 +18,22 @@ export const auth = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find user
-    const user = await User.findById(decoded.userId).select('-password');
+    const users = await sql`
+      select
+        id,
+        name,
+        email,
+        role,
+        recruiter_id as "recruiterId",
+        created_at as "createdAt"
+      from users
+      where id = ${decoded.userId}
+      limit 1
+    `;
 
-    if (!user) {
+    const userRow = users[0];
+
+    if (!userRow) {
       return res.status(401).json({
         success: false,
         error: 'User not found'
@@ -29,7 +41,7 @@ export const auth = async (req, res, next) => {
     }
 
     // Attach user to request
-    req.user = user;
+    req.user = { _id: userRow.id, ...userRow };
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);

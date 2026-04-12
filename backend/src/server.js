@@ -1,22 +1,56 @@
 // -------------------- IMPORTS --------------------
+import './env.js';
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import sql from './db.js';
 
 import authRoutes from './routes/auth.js';
 import recruiterRoutes from './routes/recruiter.js';
 import feedbackRoutes from './routes/feedback.js';
 import adminRoutes from './routes/admin.js';
-// import jobRoutes from './routes/job.js';  // if added
+import jobRoutes from './routes/job.js';
+import applicationRoutes from './routes/application.js';
 
 // -------------------- CONFIG --------------------
-dotenv.config();
 const app = express();
+
+// -------------------- SECURITY --------------------
+app.use(helmet());
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests, please try again later.' },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many authentication attempts, please try again later.' },
+});
+
+const feedbackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many feedback submissions, please try again later.' },
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/auth/', authLimiter);
+app.use('/api/feedback', feedbackLimiter);
 
 // -------------------- CORS SETUP --------------------
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
   /^https:\/\/recruiter-risk.*\.vercel\.app$/,
   process.env.FRONTEND_ORIGIN
 ].filter(Boolean); // Filter out undefined values
@@ -41,7 +75,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/recruiter", recruiterRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
-// app.use("/jobs", jobRoutes);  // optional
+app.use("/api/jobs", jobRoutes);
+app.use("/api/applications", applicationRoutes);
 
 // -------------------- ERROR HANDLER --------------------
 app.use((err, req, res, next) => {
@@ -65,15 +100,25 @@ app.use((req, res, next) => {
   res.status(404).json({ error: "Not found" });
 });
 
-// -------------------- DATABASE CONNECTION --------------------
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB Connected Successfully"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
-
-// -------------------- SERVER --------------------
+// -------------------- STARTUP --------------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, "0.0.0.0", () =>
-  console.log(`🚀 RecruiterRisk API running on port ${PORT}`)
-);
 
+const start = async () => {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('Missing DATABASE_URL. Set it in backend/.env');
+    }
+
+    await sql`select 1 as ok`;
+    console.log('✅ Postgres Connected (Supabase)');
+
+    app.listen(PORT, "0.0.0.0", () =>
+      console.log(`🚀 RecruiterRisk API running on port ${PORT}`)
+    );
+  } catch (err) {
+    console.error("❌ Database Connection Error:", err?.message || err);
+    process.exit(1);
+  }
+};
+
+start();

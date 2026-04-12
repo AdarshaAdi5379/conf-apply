@@ -6,6 +6,7 @@ import {
   Users, BookOpen, Award, TrendingUp, ExternalLink, ArrowLeft
 } from 'lucide-react';
 import { getTrustLevel, formatDate } from '../utils/helpers';
+import { jobAPI, applicationAPI } from '../services/api';
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -32,9 +33,7 @@ const JobDetails = () => {
 
   const fetchJobDetails = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/jobs/${id}`);
-      const data = await response.json();
-      
+      const { data } = await jobAPI.getById(id);
       if (data.success) {
         setJob(data.data);
       }
@@ -65,16 +64,7 @@ const JobDetails = () => {
         formData.append('resume', resume);
       }
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/applications`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      const data = await response.json();
+      const { data } = await applicationAPI.submit(applicationData, formData);
 
       if (data.success) {
         alert('Application submitted successfully!');

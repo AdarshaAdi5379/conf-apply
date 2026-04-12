@@ -2,7 +2,8 @@ import express from 'express';
 const router = express.Router();
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
-import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import sql from '../db.js';
 import { auth } from '../middleware/auth.js';
 
 // @route   POST /api/auth/register
@@ -26,25 +27,26 @@ router.post('/register', [
     const { name, email, password, role } = req.body;
 
     // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingUsers = await sql`select id from users where email = ${email} limit 1`;
+    if (existingUsers.length > 0) {
       return res.status(400).json({
         success: false,
         error: 'User already exists with this email'
       });
     }
 
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role: role || 'candidate'
-    });
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const createdUsers = await sql`
+      insert into users (name, email, password_hash, role)
+      values (${name}, ${email}, ${passwordHash}, ${role || 'candidate'})
+      returning id, name, email, role, created_at as "createdAt"
+    `;
+    const user = createdUsers[0];
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user.id },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -54,7 +56,7 @@ router.post('/register', [
       data: {
         token,
         user: {
-          _id: user._id,
+          _id: user.id,
           name: user.name,
           email: user.email,
           role: user.role
@@ -89,7 +91,14 @@ router.post('/login', [
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ email }).select('+password');
+    const users = await sql`
+      select id, name, email, role, password_hash as "passwordHash"
+      from users
+      where email = ${email}
+      limit 1
+    `;
+    const user = users[0];
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -98,7 +107,7 @@ router.post('/login', [
     }
 
     // Check password
-    const isPasswordMatch = await user.comparePassword(password);
+    const isPasswordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
@@ -108,7 +117,7 @@ router.post('/login', [
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user.id },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -118,7 +127,7 @@ router.post('/login', [
       data: {
         token,
         user: {
-          _id: user._id,
+          _id: user.id,
           name: user.name,
           email: user.email,
           role: user.role
@@ -139,7 +148,13 @@ router.post('/login', [
 // @access  Private
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
+    const users = await sql`
+      select id, name, email, role, recruiter_id as "recruiterId", created_at as "createdAt"
+      from users
+      where id = ${req.user._id}
+      limit 1
+    `;
+    const user = users[0];
     
     if (!user) {
       return res.status(404).json({
@@ -150,7 +165,7 @@ router.get('/me', auth, async (req, res) => {
 
     res.json({
       success: true,
-      data: user
+      data: { _id: user.id, ...user }
     });
   } catch (error) {
     console.error('Get current user error:', error);

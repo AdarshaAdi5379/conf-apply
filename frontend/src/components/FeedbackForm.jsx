@@ -62,7 +62,7 @@ const FeedbackForm = ({ recruiterId, onSuccess }) => {
         payload.reportReason = formData.reportReason;
       }
 
-      await feedbackAPI.submit(payload);
+      await feedbackAPI.create(payload);
       
       // Reset form
       setFormData({

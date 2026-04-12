@@ -59,14 +59,14 @@
 <h3>Backend</h3>
 <ul>
   <li>Node.js + Express.js</li>
-  <li>Mongoose (MongoDB)</li>
+  <li>Postgres (Supabase) via <code>postgres</code> client</li>
   <li>JWT Authentication</li>
   <li>RESTful API Architecture</li>
 </ul>
 
 <h3>Database</h3>
 <ul>
-  <li>MongoDB Atlas (Cloud-hosted NoSQL database)</li>
+  <li>Supabase Postgres</li>
 </ul>
 
 <hr>
@@ -77,7 +77,7 @@
 recruiter-risk/
 ├── backend/
 │   ├── src/
-│   │   ├── models/          # MongoDB Models
+│   │   ├── db.js            # Postgres client
 │   │   ├── routes/          # Express Routes
 │   │   ├── middleware/      # Auth & Error Handling
 │   │   ├── services/        # External API Integrations
@@ -165,7 +165,8 @@ npm run dev
 <h3>Backend <code>.env</code></h3>
 <pre>
 PORT=5000
-
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.qfwmydatmystzglebfnf.supabase.co:5432/postgres
+JWT_SECRET=your_super_secret_jwt_key_here
 </pre>
 
 
@@ -176,7 +177,7 @@ PORT=5000
 <ul>
   <li><b>Backend:</b> Render </li>
   <li><b>Frontend:</b> Vercel </li>
-  <li><b>Database:</b> MongoDB Atlas</li>
+  <li><b>Database:</b> Supabase Postgres</li>
 </ul>
 
 

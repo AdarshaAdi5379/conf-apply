@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Briefcase, Eye, Users, Edit, Trash2, Copy } from 'lucide-react';
 import CreateJobForm from '../components/CreateJobForm';
+import { jobAPI } from '../services/api';
 
 const RecruiterJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -17,16 +18,8 @@ const RecruiterJobs = () => {
 
   const fetchJobs = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const url = statusFilter === 'all' 
-        ? `${import.meta.env.VITE_API_URL}/jobs/my-jobs`
-        : `${import.meta.env.VITE_API_URL}/jobs/my-jobs?status=${statusFilter}`;
-
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
+      const params = statusFilter !== 'all' ? { status: statusFilter } : {};
+      const { data } = await jobAPI.getMyJobs(params);
       if (data.success) {
         setJobs(data.data);
       }
@@ -41,14 +34,7 @@ const RecruiterJobs = () => {
     if (!window.confirm('Are you sure you want to delete this job?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/jobs/${jobId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
-      
+      const { data } = await jobAPI.delete(jobId);
       if (data.success) {
         fetchJobs();
       } else {
@@ -61,14 +47,7 @@ const RecruiterJobs = () => {
 
   const handleDuplicate = async (jobId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/jobs/${jobId}/duplicate`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      const data = await response.json();
-      
+      const { data } = await jobAPI.duplicate(jobId);
       if (data.success) {
         fetchJobs();
       }

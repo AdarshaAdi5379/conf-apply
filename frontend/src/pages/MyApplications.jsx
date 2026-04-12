@@ -5,6 +5,7 @@ import {
   Building, Calendar, TrendingUp, AlertCircle 
 } from 'lucide-react';
 import { formatDate, formatRelativeTime, getTrustLevel } from '../utils/helpers';
+import { applicationAPI } from '../services/api';
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -18,16 +19,8 @@ const MyApplications = () => {
 
   const fetchApplications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const url = statusFilter === 'all'
-        ? `${import.meta.env.VITE_API_URL}/applications/my-applications`
-        : `${import.meta.env.VITE_API_URL}/applications/my-applications?status=${statusFilter}`;
-
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await response.json();
-      
+      const params = statusFilter !== 'all' ? { status: statusFilter } : {};
+      const { data } = await applicationAPI.getMyApplications(params);
       if (data.success) {
         setApplications(data.data);
       }
@@ -42,17 +35,7 @@ const MyApplications = () => {
     if (!window.confirm('Are you sure you want to withdraw this application?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/applications/${applicationId}`,
-        {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
-
-      const data = await response.json();
-      
+      const { data } = await applicationAPI.withdraw(applicationId);
       if (data.success) {
         fetchApplications();
       }

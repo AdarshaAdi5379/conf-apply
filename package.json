@@ -1,5 +1,24 @@
 {
-  "dependencies": {
-    "@auth0/auth0-react": "^2.7.0"
+  "name": "recruiter-risk",
+  "version": "1.0.0",
+  "description": "AI-powered recruiter trust and fraud detection platform",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm run start --prefix backend",
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend"
+  },
+  "author": "Adarsha K K",
+  "license": "SEE LICENSE IN LICENSE",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitest/coverage-v8": "^4.1.2",
+    "concurrently": "^9.2.1",
+    "jsdom": "^29.0.1",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.2"
   }
 }

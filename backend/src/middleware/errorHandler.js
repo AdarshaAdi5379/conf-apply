@@ -2,24 +2,20 @@ export default (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Log to console for dev
   console.error('Error:', err);
 
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
-    error = { message, statusCode: 404 };
-  }
-
-  // Mongoose duplicate key
-  if (err.code === 11000) {
+  if (err.code === '23505') {
     const message = 'Duplicate field value entered';
     error = { message, statusCode: 400 };
   }
 
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message).join(', ');
+  if (err.code === '23503') {
+    const message = 'Referenced resource not found';
+    error = { message, statusCode: 404 };
+  }
+
+  if (err.code === '23502') {
+    const message = 'Required field is missing';
     error = { message, statusCode: 400 };
   }
 

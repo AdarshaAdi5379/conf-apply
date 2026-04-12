@@ -1,5 +1,5 @@
 import natural from 'natural';
-import Feedback from '../models/Feedback.js';
+import sql from '../db.js';
 
 class TrustScoreService {
   constructor() {
@@ -33,16 +33,18 @@ class TrustScoreService {
 
   async calculateAverageSentiment(recruiterId) {
     try {
-      const feedbacks = await Feedback.find({ recruiterId });
-      
-      if (feedbacks.length === 0) {
-        return 0;
-      }
+      const rows = await sql`
+        select
+          count(*)::int as count,
+          coalesce(avg(sentiment_score), 0)::float as avg_sentiment
+        from feedback
+        where recruiter_id = ${recruiterId}
+      `;
 
-      const totalSentiment = feedbacks.reduce((sum, feedback) => sum + feedback.sentimentScore, 0);
-      const averageSentiment = totalSentiment / feedbacks.length;
-      
-      return Math.round((averageSentiment + 100) / 2);
+      const { count, avg_sentiment: avgSentiment } = rows[0] || { count: 0, avg_sentiment: 0 };
+      if (count === 0) return 0;
+
+      return Math.round((avgSentiment + 100) / 2);
     } catch (error) {
       console.error('Calculate average sentiment error:', error);
       return 0;
