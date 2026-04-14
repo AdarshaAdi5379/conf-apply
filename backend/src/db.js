@@ -4,7 +4,7 @@ import './env.js';
 
 dns.setDefaultResultOrder('ipv4first');
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL?.trim();
 
 const missingDatabaseUrlError = new Error('Missing DATABASE_URL. Set it in backend/.env');
 

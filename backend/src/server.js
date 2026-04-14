@@ -16,6 +16,7 @@ import applicationRoutes from './routes/application.js';
 // -------------------- CONFIG --------------------
 const app = express();
 app.locals.dbOk = false;
+app.locals.dbError = null;
 
 // -------------------- SECURITY --------------------
 app.use(helmet());
@@ -73,7 +74,13 @@ app.use(express.json());
 // Render (and many load balancers) default health checks hit `/`.
 // Keep it lightweight and always return 200 if the process is up.
 app.get("/", (req, res) => res.status(200).send("ok"));
-app.get("/health", (req, res) => res.json({ ok: true, dbOk: !!app.locals.dbOk }));
+app.get("/health", (req, res) =>
+  res.json({
+    ok: true,
+    dbOk: !!app.locals.dbOk,
+    dbError: app.locals.dbOk ? null : app.locals.dbError,
+  })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/recruiter", recruiterRoutes);
@@ -117,6 +124,7 @@ const start = async () => {
     const checkDb = async () => {
       if (!process.env.DATABASE_URL) {
         app.locals.dbOk = false;
+        app.locals.dbError = { message: 'Missing DATABASE_URL' };
         if (lastDbOk !== false) {
           lastDbOk = false;
           console.error('❌ Missing DATABASE_URL (set it in Render environment variables)');
@@ -129,15 +137,19 @@ const start = async () => {
       try {
         await sql`select 1 as ok`;
         ok = true;
+        app.locals.dbError = null;
       } catch (err) {
         ok = false;
+        const code = err?.code || err?.name;
+        const message = String(err?.message || 'Unknown DB error');
+        app.locals.dbError = { code, message };
       }
 
       app.locals.dbOk = ok;
       if (ok !== lastDbOk) {
         lastDbOk = ok;
         if (ok) console.log('✅ Postgres Connected (Supabase)');
-        else console.error('❌ Postgres Not Connected (will retry)');
+        else console.error('❌ Postgres Not Connected (will retry)', app.locals.dbError);
       }
 
       setTimeout(checkDb, ok ? 60_000 : 5_000);
