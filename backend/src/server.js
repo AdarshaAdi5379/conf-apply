@@ -109,16 +109,22 @@ const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   try {
-    if (!process.env.DATABASE_URL) {
-      throw new Error('Missing DATABASE_URL. Set it in backend/.env');
-    }
-
     app.listen(PORT, "0.0.0.0", () =>
       console.log(`🚀 RecruiterRisk API running on port ${PORT}`)
     );
 
     let lastDbOk = null;
     const checkDb = async () => {
+      if (!process.env.DATABASE_URL) {
+        app.locals.dbOk = false;
+        if (lastDbOk !== false) {
+          lastDbOk = false;
+          console.error('❌ Missing DATABASE_URL (set it in Render environment variables)');
+        }
+        setTimeout(checkDb, 30_000);
+        return;
+      }
+
       let ok = false;
       try {
         await sql`select 1 as ok`;

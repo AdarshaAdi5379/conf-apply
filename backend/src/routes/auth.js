@@ -9,6 +9,14 @@ import { auth } from '../middleware/auth.js';
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || !secret.trim()) {
+    throw new Error('Missing JWT_SECRET (set it in Render environment variables)');
+  }
+  return secret;
+}
+
 function generateTokens(user) {
   const payload = {
     userId: user.id,
@@ -16,10 +24,30 @@ function generateTokens(user) {
     recruiterId: user.recruiterId
   };
   
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-  const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  const jwtSecret = getJwtSecret();
+
+  const accessToken = jwt.sign(payload, jwtSecret, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, jwtSecret, { expiresIn: REFRESH_TOKEN_EXPIRY });
   
   return { accessToken, refreshToken };
+}
+
+function mapAuthError(error) {
+  const msg = String(error?.message || '');
+
+  if (msg.includes('Missing JWT_SECRET')) {
+    return { status: 500, error: 'Server misconfigured: missing JWT_SECRET' };
+  }
+  if (msg.includes('Missing DATABASE_URL')) {
+    return { status: 500, error: 'Server misconfigured: missing DATABASE_URL' };
+  }
+
+  // Postgres: missing table / schema not applied
+  if (error?.code === '42P01' || msg.toLowerCase().includes('relation') && msg.toLowerCase().includes('does not exist')) {
+    return { status: 500, error: 'Database schema not initialized (missing tables)' };
+  }
+
+  return { status: 500, error: 'Server error' };
 }
 
 // @route   POST /api/auth/register
@@ -77,10 +105,8 @@ router.post('/register', [
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Server error during registration'
-    });
+    const mapped = mapAuthError(error);
+    res.status(mapped.status).json({ success: false, error: mapped.error });
   }
 });
 
@@ -144,10 +170,8 @@ router.post('/login', [
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Server error during login'
-    });
+    const mapped = mapAuthError(error);
+    res.status(mapped.status).json({ success: false, error: mapped.error });
   }
 });
 

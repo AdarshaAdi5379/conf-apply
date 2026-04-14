@@ -1,47 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import Hero from '../src/components/Hero.jsx';
 
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    Link: ({ to, children, className }) => (
-      <a href={to} className={className} data-testid="link">{children}</a>
-    ),
-  };
-});
+vi.mock('lucide-react', () => ({
+  Shield: () => null,
+  CheckCircle: () => null,
+  AlertTriangle: () => null,
+  TrendingUp: () => null,
+}));
 
 const renderHero = () =>
   render(
-    <BrowserRouter>
+    <MemoryRouter>
       <Hero />
-    </BrowserRouter>
+    </MemoryRouter>
   );
 
 describe('Hero Component', () => {
   it('should render the main heading', () => {
     renderHero();
-    expect(screen.getByText(/Recruiter Trust Platform/i)).toBeInTheDocument();
+    expect(screen.getByText(/Recruit Smarter/i)).toBeInTheDocument();
   });
 
   it('should render the description text', () => {
     renderHero();
-    expect(screen.getByText(/Verify recruiters before you apply/i)).toBeInTheDocument();
+    expect(screen.getByText(/Verify recruiter authenticity/i)).toBeInTheDocument();
   });
 
   it('should render both CTA buttons', () => {
     renderHero();
-    expect(screen.getByText('Verify a Recruiter')).toBeInTheDocument();
-    expect(screen.getByText('Browse Jobs')).toBeInTheDocument();
+    expect(screen.getByText('Start Verification')).toBeInTheDocument();
+    expect(screen.getByText('View Leaderboard')).toBeInTheDocument();
   });
 
   it('should have correct link destinations', () => {
     renderHero();
-    const links = screen.getAllByTestId('link');
-    const hrefs = links.map(link => link.getAttribute('href'));
-    expect(hrefs).toContain('/verify');
-    expect(hrefs).toContain('/jobs');
+    expect(screen.getByRole('link', { name: /Start Verification/i })).toHaveAttribute('href', '/register');
+    expect(screen.getByRole('link', { name: /View Leaderboard/i })).toHaveAttribute('href', '/dashboard');
   });
 });
