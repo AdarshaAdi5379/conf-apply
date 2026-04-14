@@ -68,7 +68,8 @@ describe('Auth Routes', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.token).toBe('mock-jwt-token');
+      expect(res.body.data.accessToken).toBe('mock-jwt-token');
+      expect(res.body.data.refreshToken).toBe('mock-jwt-token');
       expect(res.body.data.user.name).toBe('New User');
       expect(res.body.data.user.email).toBe('new@example.com');
       expect(res.body.data.user.role).toBe('candidate');
@@ -136,7 +137,8 @@ describe('Auth Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.token).toBe('mock-jwt-token');
+      expect(res.body.data.accessToken).toBe('mock-jwt-token');
+      expect(res.body.data.refreshToken).toBe('mock-jwt-token');
       expect(res.body.data.user.email).toBe('test@example.com');
     });
 

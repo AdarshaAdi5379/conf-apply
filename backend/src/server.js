@@ -15,6 +15,7 @@ import applicationRoutes from './routes/application.js';
 
 // -------------------- CONFIG --------------------
 const app = express();
+app.locals.dbOk = false;
 
 // -------------------- SECURITY --------------------
 app.use(helmet());
@@ -69,7 +70,10 @@ app.use(
 app.use(express.json());
 
 // -------------------- ROUTES --------------------
-app.get("/health", (req, res) => res.json({ ok: true }));
+// Render (and many load balancers) default health checks hit `/`.
+// Keep it lightweight and always return 200 if the process is up.
+app.get("/", (req, res) => res.status(200).send("ok"));
+app.get("/health", (req, res) => res.json({ ok: true, dbOk: !!app.locals.dbOk }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/recruiter", recruiterRoutes);
@@ -109,12 +113,31 @@ const start = async () => {
       throw new Error('Missing DATABASE_URL. Set it in backend/.env');
     }
 
-    await sql`select 1 as ok`;
-    console.log('✅ Postgres Connected (Supabase)');
-
     app.listen(PORT, "0.0.0.0", () =>
       console.log(`🚀 RecruiterRisk API running on port ${PORT}`)
     );
+
+    let lastDbOk = null;
+    const checkDb = async () => {
+      let ok = false;
+      try {
+        await sql`select 1 as ok`;
+        ok = true;
+      } catch (err) {
+        ok = false;
+      }
+
+      app.locals.dbOk = ok;
+      if (ok !== lastDbOk) {
+        lastDbOk = ok;
+        if (ok) console.log('✅ Postgres Connected (Supabase)');
+        else console.error('❌ Postgres Not Connected (will retry)');
+      }
+
+      setTimeout(checkDb, ok ? 60_000 : 5_000);
+    };
+
+    void checkDb();
   } catch (err) {
     console.error("❌ Database Connection Error:", err?.message || err);
     process.exit(1);
