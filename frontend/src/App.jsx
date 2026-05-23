@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -14,11 +14,12 @@ import BrowseJobs from './pages/BrowseJobs';
 import JobDetails from './pages/JobDetails';
 import ApplicationManager from './pages/ApplicationManager';
 import MyApplications from './pages/MyApplications';
+import Profile from './pages/Profile';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <Routes>
@@ -36,6 +37,15 @@ function App() {
               }
             />
             
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/admin"
               element={
@@ -86,7 +96,7 @@ function App() {
             </div>
           </footer>
         </div>
-      </Router>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

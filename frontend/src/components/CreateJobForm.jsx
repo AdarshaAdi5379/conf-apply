@@ -17,7 +17,7 @@ const CreateJobForm = ({ onClose, onSuccess, editJob = null }) => {
     requiredSkills: [''],
     preferredSkills: [''],
     location: { city: '', state: '', country: '', isRemote: false },
-    experienceLevel: 'Mid Level',
+    experienceLevel: 'Mid',
     experienceYears: { min: 0, max: 5 },
     education: 'Bachelor',
     applicationDeadline: '',
@@ -373,9 +373,9 @@ const CreateJobForm = ({ onClose, onSuccess, editJob = null }) => {
                 Experience Level *
               </label>
               <select name="experienceLevel" value={formData.experienceLevel} onChange={handleChange} className="input-field">
-                <option value="Entry Level">Entry Level</option>
-                <option value="Mid Level">Mid Level</option>
-                <option value="Senior Level">Senior Level</option>
+                <option value="Entry">Entry Level</option>
+                <option value="Mid">Mid Level</option>
+                <option value="Senior">Senior Level</option>
                 <option value="Lead">Lead</option>
                 <option value="Executive">Executive</option>
               </select>

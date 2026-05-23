@@ -4,11 +4,14 @@ import { body, validationResult } from 'express-validator';
 import sql from '../db.js';
 import { protect, authorize } from '../middleware/auth.js';
 
+const JSON_FIELDS = new Set(['salary_range', 'location']);
+
 function toCamel(row) {
   if (!row) return null;
   const obj = {};
   for (const [key, value] of Object.entries(row)) {
-    obj[key.replace(/_([a-z])/g, (_, c) => c.toUpperCase())] = value;
+    const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    obj[camelKey] = JSON_FIELDS.has(key) && typeof value === 'string' ? JSON.parse(value) : value;
   }
   return obj;
 }

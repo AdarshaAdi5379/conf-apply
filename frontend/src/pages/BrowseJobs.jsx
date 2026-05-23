@@ -158,9 +158,9 @@ const BrowseJobs = () => {
                   className="input-field text-sm"
                 >
                   <option value="">All Experience Levels</option>
-                  <option value="Entry Level">Entry Level</option>
-                  <option value="Mid Level">Mid Level</option>
-                  <option value="Senior Level">Senior Level</option>
+                  <option value="Entry">Entry Level</option>
+                  <option value="Mid">Mid Level</option>
+                  <option value="Senior">Senior Level</option>
                   <option value="Lead">Lead</option>
                   <option value="Executive">Executive</option>
                 </select>
@@ -235,8 +235,8 @@ const BrowseJobs = () => {
 
               return (
                 <div
-                  key={job._id}
-                  onClick={() => navigate(`/jobs/${job._id}`)}
+                  key={job.id}
+                  onClick={() => navigate(`/jobs/${job.id}`)}
                   className="card hover:shadow-lg transition-shadow cursor-pointer"
                 >
                   <div className="flex justify-between items-start">
@@ -272,7 +272,9 @@ const BrowseJobs = () => {
                         <div className="flex items-center space-x-1">
                           <DollarSign className="h-4 w-4" />
                           <span>
-                            ${job.salaryRange.min.toLocaleString()} - ${job.salaryRange.max.toLocaleString()} {job.salaryRange.period}
+                            {job.salaryRange?.min != null
+                              ? `$${job.salaryRange.min.toLocaleString()} - $${job.salaryRange.max.toLocaleString()} ${job.salaryRange.period || ''}`
+                              : 'Salary not specified'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-1">

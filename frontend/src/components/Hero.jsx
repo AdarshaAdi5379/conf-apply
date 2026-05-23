@@ -1,7 +1,10 @@
 import { Shield, CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Hero = () => {
+  const { isAuthenticated, user } = useAuth();
+
   return (
     <div className="bg-gradient-to-br from-primary-50 to-blue-100 py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -13,12 +16,32 @@ const Hero = () => {
             Verify recruiter authenticity, detect fake job listings, and make informed decisions with our AI-powered trust analytics platform.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-            <Link to="/register" className="btn-primary text-lg px-8 py-3">
-              Start Verification
-            </Link>
-            <Link to="/dashboard" className="btn-secondary text-lg px-8 py-3">
-              View Leaderboard
-            </Link>
+            {isAuthenticated ? (
+              <>
+                {user?.role === 'candidate' && (
+                  <Link to="/jobs" className="btn-primary text-lg px-8 py-3">
+                    Browse Jobs
+                  </Link>
+                )}
+                {user?.role === 'recruiter' && (
+                  <Link to="/recruiter/jobs" className="btn-primary text-lg px-8 py-3">
+                    Manage Jobs
+                  </Link>
+                )}
+                <Link to="/dashboard" className="btn-secondary text-lg px-8 py-3">
+                  Go to Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/register" className="btn-primary text-lg px-8 py-3">
+                  Start Verification
+                </Link>
+                <Link to="/dashboard" className="btn-secondary text-lg px-8 py-3">
+                  View Leaderboard
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-16">

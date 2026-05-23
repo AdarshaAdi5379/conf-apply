@@ -51,8 +51,8 @@ const Leaderboard = () => {
             const trustLevel = getTrustLevel(recruiter.trustScore);
             return (
               <div
-                key={recruiter._id}
-                onClick={() => navigate(`/recruiter/${recruiter._id}`)}
+                key={recruiter.id}
+                onClick={() => navigate(`/recruiter/${recruiter.id}`)}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200"
               >
                 <div className="flex items-center space-x-4 flex-1">

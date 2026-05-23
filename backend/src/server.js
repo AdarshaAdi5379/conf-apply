@@ -12,6 +12,7 @@ import feedbackRoutes from './routes/feedback.js';
 import adminRoutes from './routes/admin.js';
 import jobRoutes from './routes/job.js';
 import applicationRoutes from './routes/application.js';
+import profileRoutes from './routes/profile.js';
 
 // -------------------- CONFIG --------------------
 const app = express();
@@ -27,6 +28,8 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many requests, please try again later.' },
+  validate: { xForwardedForHeader: false },
+  skip: (req) => req.method === 'OPTIONS',
 });
 
 const authLimiter = rateLimit({
@@ -35,6 +38,8 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many authentication attempts, please try again later.' },
+  validate: { xForwardedForHeader: false },
+  skip: (req) => req.method === 'OPTIONS',
 });
 
 const feedbackLimiter = rateLimit({
@@ -43,6 +48,8 @@ const feedbackLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many feedback submissions, please try again later.' },
+  validate: { xForwardedForHeader: false },
+  skip: (req) => req.method === 'OPTIONS',
 });
 
 app.use('/api/', generalLimiter);
@@ -88,6 +95,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
+app.use("/api/profile", profileRoutes);
 
 // -------------------- ERROR HANDLER --------------------
 app.use((err, req, res, next) => {

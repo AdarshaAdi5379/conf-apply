@@ -148,4 +148,12 @@ export const applicationAPI = {
   getRecruiterDashboard: () => api.get('/api/applications/recruiter/dashboard'),
 };
 
+export const profileAPI = {
+  getProfile: () => api.get('/api/profile'),
+  updateProfile: (data) => api.post('/api/profile', data),
+  uploadResume: (formData) => api.put('/api/profile/resume', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+};
+
 export default api;

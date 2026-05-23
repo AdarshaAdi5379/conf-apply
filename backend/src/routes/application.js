@@ -41,11 +41,14 @@ const upload = multer({
   fileFilter
 });
 
+const APP_JSON_FIELDS = new Set(['expected_salary', 'resume', 'interview_schedule', 'status_history', 'salary_range', 'location']);
+
 function toCamel(row) {
   if (!row) return null;
   const obj = {};
   for (const [key, value] of Object.entries(row)) {
-    obj[key.replace(/_([a-z])/g, (_, c) => c.toUpperCase())] = value;
+    const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    obj[camelKey] = APP_JSON_FIELDS.has(key) && typeof value === 'string' ? JSON.parse(value) : value;
   }
   return obj;
 }
@@ -83,17 +86,21 @@ router.post('/', protect, authorize('candidate'), upload.single('resume'), [
       return res.status(400).json({ success: false, error: 'You have already applied to this job' });
     }
 
+    // Fetch candidate profile for pre-filling
+    const profiles = await sql`select * from candidate_profiles where user_id = ${req.user.id} limit 1`;
+    const profile = profiles[0] || {};
+
     const applicationData = {
       jobId,
       candidateId: req.user.id,
       recruiterId: job.recruiter_id,
       coverLetter: req.body.coverLetter || null,
-      portfolio: req.body.portfolio || null,
-      linkedIn: req.body.linkedIn || null,
-      github: req.body.github || null,
-      phone: req.body.phone || null,
-      availability: req.body.availability || null,
-      expectedSalary: req.body.expectedSalary ? JSON.parse(req.body.expectedSalary) : null
+      portfolio: req.body.portfolio || profile.portfolio_url || null,
+      linkedIn: req.body.linkedIn || profile.linkedin_url || null,
+      github: req.body.github || profile.github_url || null,
+      phone: req.body.phone || profile.phone || null,
+      availability: req.body.availability || profile.availability || null,
+      expectedSalary: req.body.expectedSalary ? JSON.parse(req.body.expectedSalary) : (profile.expected_salary || null)
     };
 
     if (req.file) {
@@ -102,6 +109,13 @@ router.post('/', protect, authorize('candidate'), upload.single('resume'), [
         filepath: req.file.path,
         filesize: req.file.size,
         mimetype: req.file.mimetype
+      });
+    } else if (profile.resume_url) {
+      applicationData.resume = JSON.stringify({
+        filename: profile.resume_name,
+        filepath: profile.resume_url,
+        filesize: 0, // Not stored in profile
+        mimetype: 'application/pdf' // Defaulting
       });
     }
 
