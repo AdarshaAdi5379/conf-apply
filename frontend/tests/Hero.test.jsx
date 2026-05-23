@@ -1,7 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Hero from '../src/components/Hero.jsx';
+
+vi.mock('../src/context/AuthContext', () => ({
+  useAuth: vi.fn().mockReturnValue({ isAuthenticated: false, user: null }),
+}));
 
 vi.mock('lucide-react', () => ({
   Shield: () => null,

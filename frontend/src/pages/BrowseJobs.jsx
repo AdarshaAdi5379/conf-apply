@@ -316,7 +316,7 @@ const BrowseJobs = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/jobs/${job._id}`);
+                        navigate(`/jobs/${job.id}`);
                       }}
                       className="btn-primary text-sm"
                     >

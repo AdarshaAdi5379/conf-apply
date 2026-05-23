@@ -50,6 +50,7 @@ function toCamel(row) {
     const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
     obj[camelKey] = APP_JSON_FIELDS.has(key) && typeof value === 'string' ? JSON.parse(value) : value;
   }
+  if (row.id && !obj._id) obj._id = row.id;
   return obj;
 }
 
@@ -58,9 +59,9 @@ function toCamel(row) {
 // @access  Private (Candidate only)
 router.post('/', protect, authorize('candidate'), upload.single('resume'), [
   body('jobId').notEmpty().withMessage('Job ID is required'),
-  body('coverLetter').optional().isLength({ max: 2000 }),
-  body('phone').optional().isMobilePhone(),
-  body('availability').optional().isIn(['Immediate', '2 weeks', '1 month', '2 months', '3+ months'])
+  body('coverLetter').optional({ values: 'falsy' }).isLength({ max: 2000 }),
+  body('phone').optional({ values: 'falsy' }).isLength({ max: 20 }).trim(),
+  body('availability').optional({ values: 'falsy' }).isIn(['Immediate', '2 weeks', '1 month', '2 months', '3+ months'])
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -86,9 +87,12 @@ router.post('/', protect, authorize('candidate'), upload.single('resume'), [
       return res.status(400).json({ success: false, error: 'You have already applied to this job' });
     }
 
-    // Fetch candidate profile for pre-filling
-    const profiles = await sql`select * from candidate_profiles where user_id = ${req.user.id} limit 1`;
-    const profile = profiles[0] || {};
+    // Fetch candidate profile for pre-filling (optional — table may not exist)
+    let profile = {};
+    try {
+      const profiles = await sql`select * from candidate_profiles where user_id = ${req.user.id} limit 1`;
+      profile = profiles[0] || {};
+    } catch (_) { /* candidate_profiles table doesn't exist yet */ }
 
     const applicationData = {
       jobId,
@@ -171,12 +175,13 @@ router.get('/my-applications', protect, authorize('candidate'), async (req, res)
       limit ${parseInt(limit)} offset ${skip}
     `;
 
-    const totalResult = await sql`select count(*) from applications where ${where}`;
+    const totalResult = await sql`select count(*) from applications a where ${where}`;
     const total = parseInt(totalResult[0].count);
 
     const appsWithDetails = applications.map(a => ({
       ...toCamel(a),
       jobId: {
+        id: a.job_id,
         title: a.title,
         company: a.company,
         roleType: a.role_type,
@@ -185,6 +190,7 @@ router.get('/my-applications', protect, authorize('candidate'), async (req, res)
         status: a.job_status
       },
       recruiterId: {
+        id: a.recruiter_id,
         name: a.recruiter_name,
         company: a.recruiter_company,
         trustScore: a.trust_score
@@ -236,7 +242,7 @@ router.get('/job/:jobId', protect, authorize('recruiter', 'admin'), async (req, 
       limit ${parseInt(limit)} offset ${skip}
     `;
 
-    const totalResult = await sql`select count(*) from applications where ${where}`;
+    const totalResult = await sql`select count(*) from applications a where ${where}`;
     const total = parseInt(totalResult[0].count);
 
     const statusBreakdown = await sql`

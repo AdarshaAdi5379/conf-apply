@@ -177,7 +177,7 @@ router.post('/verify', [
   }
 });
 
-// @route   GET /api/recruiter/leaderboard
+// @route   GET /api/recruiter/list/leaderboard
 router.get('/list/leaderboard', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
@@ -206,7 +206,7 @@ router.get('/list/leaderboard', async (req, res) => {
   }
 });
 
-// @route   GET /api/recruiter/search
+// @route   GET /api/recruiter/search/query
 router.get('/search/query', async (req, res) => {
   try {
     const { q, company } = req.query;

@@ -190,7 +190,7 @@ const MyApplications = () => {
                       <div>
                         <h3 
                           className="text-xl font-semibold text-gray-900 hover:text-primary-600 cursor-pointer"
-                          onClick={() => navigate(`/jobs/${job._id}`)}
+                          onClick={() => navigate(`/jobs/${job.id}`)}
                         >
                           {job.title}
                         </h3>
@@ -199,7 +199,7 @@ const MyApplications = () => {
                           <span>{job.company}</span>
                           {recruiter && (
                             <button
-                              onClick={() => navigate(`/recruiter/${recruiter._id}`)}
+                              onClick={() => navigate(`/recruiter/${recruiter.id}`)}
                               className="text-primary-600 hover:text-primary-700 text-sm"
                             >
                               (View Recruiter)
@@ -278,7 +278,7 @@ const MyApplications = () => {
                 <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                   <div className="flex space-x-3">
                     <button
-                      onClick={() => navigate(`/jobs/${job._id}`)}
+                          onClick={() => navigate(`/jobs/${job.id}`)}
                       className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                     >
                       View Job

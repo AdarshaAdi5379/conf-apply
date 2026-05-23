@@ -13,6 +13,7 @@ function toCamel(row) {
     const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
     obj[camelKey] = JSON_FIELDS.has(key) && typeof value === 'string' ? JSON.parse(value) : value;
   }
+  if (row.id && !obj._id) obj._id = row.id;
   return obj;
 }
 

@@ -98,8 +98,8 @@ const JobDetails = () => {
     );
   }
 
-  const trustLevel = job.recruiterId?.trustScore 
-    ? getTrustLevel(job.recruiterId.trustScore) 
+  const trustLevel = job.trustScore
+    ? getTrustLevel(job.trustScore)
     : null;
 
   const daysRemaining = Math.max(0, Math.ceil(
@@ -144,7 +144,7 @@ const JobDetails = () => {
                 </span>
                 {trustLevel && (
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${trustLevel.bgColor} ${trustLevel.textColor}`}>
-                    Recruiter Trust: {job.recruiterId.trustScore}
+                    Recruiter Trust: {job.trustScore}
                   </span>
                 )}
               </div>
@@ -380,14 +380,14 @@ const JobDetails = () => {
                   <p className="text-sm text-gray-600">Company</p>
                   <p className="font-semibold text-gray-900">{job.company}</p>
                 </div>
-                {job.recruiterId && (
+                {job.recruiterId && job.recruiterName && (
                   <div>
                     <p className="text-sm text-gray-600">Recruiter</p>
                     <button
-                      onClick={() => navigate(`/recruiter/${job.recruiterId._id}`)}
+                      onClick={() => navigate(`/recruiter/${job.recruiterId}`)}
                       className="font-semibold text-primary-600 hover:text-primary-700 flex items-center space-x-1"
                     >
-                      <span>{job.recruiterId.name}</span>
+                      <span>{job.recruiterName}</span>
                       <ExternalLink className="h-4 w-4" />
                     </button>
                   </div>

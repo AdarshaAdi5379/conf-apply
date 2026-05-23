@@ -44,6 +44,7 @@ const upload = multer({
 const mapProfileRow = (row) => {
   if (!row) return null;
   return {
+    _id: row.id,
     id: row.id,
     userId: row.user_id,
     phone: row.phone,

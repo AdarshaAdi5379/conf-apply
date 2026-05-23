@@ -131,9 +131,7 @@ export const jobAPI = {
 export const applicationAPI = {
   submit: (data, formData) => {
     if (formData) {
-      return api.post('/api/applications', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      return api.post('/api/applications', formData);
     }
     return api.post('/api/applications', data);
   },
