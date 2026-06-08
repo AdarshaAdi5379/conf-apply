@@ -126,5 +126,11 @@ describe('Recruiter Routes', () => {
       const res = await request(app).get('/api/recruiter/nonexistent');
       expect(res.status).toBe(404);
     });
+
+    it('should return 400 for invalid recruiter id', async () => {
+      const res = await request(app).get('/api/recruiter/undefined');
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Invalid recruiter ID');
+    });
   });
 });

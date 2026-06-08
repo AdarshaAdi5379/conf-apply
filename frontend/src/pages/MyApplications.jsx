@@ -4,7 +4,7 @@ import {
   Briefcase, Clock, Check, X, Eye, MapPin, 
   Building, Calendar, TrendingUp, AlertCircle 
 } from 'lucide-react';
-import { formatDate, formatRelativeTime, getTrustLevel } from '../utils/helpers';
+import { formatDate, formatRelativeTime, getRecruiterId, getTrustLevel } from '../utils/helpers';
 import { applicationAPI } from '../services/api';
 
 const MyApplications = () => {
@@ -180,6 +180,7 @@ const MyApplications = () => {
           {applications.map((application) => {
             const job = application.jobId;
             const recruiter = application.recruiterId;
+            const recruiterProfileId = getRecruiterId(recruiter);
             const trustLevel = recruiter?.trustScore ? getTrustLevel(recruiter.trustScore) : null;
 
             return (
@@ -197,9 +198,9 @@ const MyApplications = () => {
                         <div className="flex items-center space-x-2 text-gray-600 mt-1">
                           <Building className="h-4 w-4" />
                           <span>{job.company}</span>
-                          {recruiter && (
+                          {recruiterProfileId && (
                             <button
-                              onClick={() => navigate(`/recruiter/${recruiter.id}`)}
+                              onClick={() => navigate(`/recruiter/${recruiterProfileId}`)}
                               className="text-primary-600 hover:text-primary-700 text-sm"
                             >
                               (View Recruiter)
@@ -283,9 +284,9 @@ const MyApplications = () => {
                     >
                       View Job
                     </button>
-                    {recruiter && (
+                    {recruiterProfileId && (
                       <button
-                        onClick={() => navigate(`/recruiter/${recruiter._id}`)}
+                        onClick={() => navigate(`/recruiter/${recruiterProfileId}`)}
                         className="text-gray-600 hover:text-gray-700 text-sm font-medium"
                       >
                         View Recruiter

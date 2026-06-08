@@ -41,6 +41,9 @@ function mapAuthError(error) {
   if (msg.includes('Missing DATABASE_URL')) {
     return { status: 500, error: 'Server misconfigured: missing DATABASE_URL' };
   }
+  if (["ENOTFOUND", "ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "XX000"].includes(error?.code) || msg.includes('tenant/user')) {
+    return { status: 500, error: 'Database connection failed. Check DATABASE_URL and database availability' };
+  }
 
   // Postgres: missing table / schema not applied
   if (error?.code === '42P01' || msg.toLowerCase().includes('relation') && msg.toLowerCase().includes('does not exist')) {
@@ -201,10 +204,8 @@ router.get('/me', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Get current user error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Server error'
-    });
+    const mapped = mapAuthError(error);
+    res.status(mapped.status).json({ success: false, error: mapped.error });
   }
 });
 

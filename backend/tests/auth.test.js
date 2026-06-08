@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import authRoutes from '../src/routes/auth.js';
@@ -19,13 +19,19 @@ vi.mock('../src/db.js', () => {
 
     if (query.includes('select id from users where email')) {
       const email = values[0];
-      const found = mockUsers.find(u => u.email === email);
+      const found = mockUsers.find((user) => user.email === email);
       return found ? [{ id: found.id }] : [];
     }
 
     if (query.includes('select id, name, email, role, password_hash')) {
       const email = values[0];
-      const found = mockUsers.find(u => u.email === email);
+      if (email === 'db-error@example.com') {
+        const error = new Error('tenant/user postgres.xynhdlsemwjtjxrgtkhu not found');
+        error.code = 'XX000';
+        throw error;
+      }
+
+      const found = mockUsers.find((user) => user.email === email);
       return found ? [{ ...found, passwordHash: found.passwordHash }] : [];
     }
 
@@ -35,6 +41,7 @@ vi.mock('../src/db.js', () => {
 
     return [];
   };
+
   mockSql.unsafe = async () => [];
   return { default: mockSql };
 });
@@ -42,9 +49,7 @@ vi.mock('../src/db.js', () => {
 vi.mock('bcryptjs', () => ({
   default: {
     hash: vi.fn().mockResolvedValue('$2b$10$hashedpassword'),
-    compare: vi.fn().mockImplementation((password, hash) => {
-      return Promise.resolve(password === 'password123');
-    }),
+    compare: vi.fn().mockImplementation((password) => Promise.resolve(password === 'password123')),
   },
 }));
 
@@ -174,6 +179,15 @@ describe('Auth Routes', () => {
         .send({ email: 'test@example.com' });
 
       expect(res.status).toBe(400);
+    });
+
+    it('should surface database connection errors clearly', async () => {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'db-error@example.com', password: 'password123' });
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toBe('Database connection failed. Check DATABASE_URL and database availability');
     });
   });
 

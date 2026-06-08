@@ -42,3 +42,17 @@ export const truncateText = (text, maxLength) => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 };
+
+export const getRecruiterId = (recruiter) => {
+  if (!recruiter) return null;
+  if (typeof recruiter === 'string') {
+    const trimmed = recruiter.trim();
+    return trimmed && trimmed !== 'undefined' && trimmed !== 'null' ? trimmed : null;
+  }
+
+  const candidateId = recruiter._id ?? recruiter.id ?? recruiter.recruiterId ?? null;
+  if (typeof candidateId !== 'string') return candidateId ?? null;
+
+  const trimmed = candidateId.trim();
+  return trimmed && trimmed !== 'undefined' && trimmed !== 'null' ? trimmed : null;
+};

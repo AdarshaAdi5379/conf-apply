@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { recruiterAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Building, Mail, Linkedin, Globe, Star, TrendingUp, Eye } from 'lucide-react';
-import { getTrustLevel, formatDate, getStarArray } from '../utils/helpers';
+import { getTrustLevel, formatDate, getStarArray, getRecruiterId } from '../utils/helpers';
 import FeedbackForm from '../components/FeedbackForm';
 
 const RecruiterProfile = () => {
@@ -18,8 +18,15 @@ const RecruiterProfile = () => {
   }, [id]);
 
   const fetchRecruiterProfile = async () => {
+    const recruiterId = getRecruiterId(id);
+    if (!recruiterId) {
+      setError('Invalid recruiter profile');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await recruiterAPI.getById(id);
+      const response = await recruiterAPI.getById(recruiterId);
       setData(response.data.data);
     } catch (err) {
       setError('Failed to load recruiter profile');

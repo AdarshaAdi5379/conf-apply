@@ -27,10 +27,10 @@ describe('API Service', () => {
   });
 
   it('should create axios instance with correct base URL', async () => {
-    const apiModule = await import('../src/services/api');
+    await import('../src/services/api');
     expect(axios.create).toHaveBeenCalled();
     const callArgs = axios.create.mock.calls[0][0];
-    expect(callArgs.baseURL).toBeDefined();
+    expect(callArgs.baseURL).toBe('http://localhost:5000');
     expect(callArgs.headers['Content-Type']).toBe('application/json');
   });
 

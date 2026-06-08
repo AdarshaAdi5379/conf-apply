@@ -8,6 +8,12 @@ import hunterService from '../services/hunterService.js';
 import safeBrowsingService from '../services/safeBrowsingService.js';
 import trustScoreService from '../services/trustScoreService.js';
 
+const isInvalidRouteId = (value) => {
+  if (typeof value !== 'string') return true;
+  const trimmed = value.trim();
+  return !trimmed || trimmed === 'undefined' || trimmed === 'null';
+};
+
 const mapRecruiterRow = (row) => {
   if (!row) return null;
   return {
@@ -252,6 +258,9 @@ router.get('/search/query', async (req, res) => {
 // @route   GET /api/recruiter/:id
 router.get('/:id', async (req, res) => {
   try {
+    if (isInvalidRouteId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid recruiter ID' });
+    }
     const recruiters = await sql`select * from recruiters where id = ${req.params.id} limit 1`;
     const recruiterRow = recruiters[0];
 
@@ -301,6 +310,9 @@ router.get('/:id', async (req, res) => {
 // @route   PUT /api/recruiter/:id
 router.put('/:id', protect, authorize('recruiter', 'admin'), async (req, res) => {
   try {
+    if (isInvalidRouteId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Invalid recruiter ID' });
+    }
     const { company, linkedInUrl, companyWebsite, position } = req.body;
     
     const recruiters = await sql`select * from recruiters where id = ${req.params.id} limit 1`;

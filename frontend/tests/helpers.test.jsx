@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getTrustLevel, formatDate, formatRelativeTime } from '../src/utils/helpers.js';
+import { getTrustLevel, formatDate, formatRelativeTime, getRecruiterId } from '../src/utils/helpers.js';
 
 describe('Helpers', () => {
   describe('getTrustLevel', () => {
@@ -42,6 +42,22 @@ describe('Helpers', () => {
     it('should return Today for current date', () => {
       const result = formatRelativeTime(new Date().toISOString());
       expect(result).toBe('Today');
+    });
+  });
+
+  describe('getRecruiterId', () => {
+    it('should prefer _id over id', () => {
+      expect(getRecruiterId({ _id: 'rec-1', id: 'rec-2' })).toBe('rec-1');
+    });
+
+    it('should fall back to id', () => {
+      expect(getRecruiterId({ id: 'rec-2' })).toBe('rec-2');
+    });
+
+    it('should reject undefined-like values', () => {
+      expect(getRecruiterId('undefined')).toBeNull();
+      expect(getRecruiterId({ id: 'null' })).toBeNull();
+      expect(getRecruiterId(null)).toBeNull();
     });
   });
 });
